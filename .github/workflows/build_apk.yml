@@ -16,9 +16,15 @@ jobs:
           channel: 'stable'
       - name: Auto Create Project & Build
         run: |
+          # إنشاء المشروع وتخطي المشاكل التلقائية
           flutter create --org com.aldkheel --project-name family_tree_app base_project
-          cp genealogy_canvas_widget.dart base_project/lib/
-          cat << 'EXTRA' > base_project/lib/main.dart
+          cd base_project
+          
+          # نسخ ملف الشجرة إلى المكان الصحيح
+          cp ../genealogy_canvas_widget.dart lib/
+          
+          # كتابة ملف التشغيل الرئيسي بشكل مبسط جداً
+          cat << 'EXTRA' > lib/main.dart
           import 'package:flutter/material.dart';
           import 'genealogy_canvas_widget.dart';
           void main() => runApp(MaterialApp(
@@ -26,7 +32,8 @@ jobs:
             home: Scaffold(body: SafeArea(child: GenealogyCanvas(elementsJson: '{}', onElementsChanged: (json) async => null))),
           ));
           EXTRA
-          cd base_project
+          
+          # تهيئة وتحديث المكتبات داخل السيرفر
           flutter pub get
           flutter build apk --release
       - name: Upload APK
