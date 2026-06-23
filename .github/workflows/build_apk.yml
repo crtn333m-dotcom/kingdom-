@@ -1,4 +1,4 @@
-name: Build Family Tree APK
+name: Build Family Tree Web App
 on:
   push:
     branches: [ "main" ]
@@ -10,28 +10,17 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.19.0'
           channel: 'stable'
 
-      - name: Create Project & Clean Build
+      - name: Create & Build Web
         run: |
-          # إنشاء مشروع فلوتر نظيف
           flutter create --org com.aldkheel --project-name family_tree_app base_project
           cd base_project
-          
-          # نقل ملف الشجرة
           cp ../genealogy_canvas_widget.dart lib/
-          
-          # كتابة ملف main.dart القياسي
           cat << 'EXTRA' > lib/main.dart
           import 'package:flutter/material.dart';
           import 'genealogy_canvas_widget.dart';
@@ -40,13 +29,11 @@ jobs:
             home: Scaffold(body: SafeArea(child: GenealogyCanvas(elementsJson: '{}', onElementsChanged: (json) async => null))),
           ));
           EXTRA
-          
-          # تنظيف الـ cache وبناء الـ APK بأمر قياسي بدون تعديل ملفات gradle بـ سكريبتات خارجية
           flutter pub get
-          flutter build apk --release --no-tree-shake-icons
-          
-      - name: Upload APK
+          flutter build web --release
+
+      - name: Upload Web Build
         uses: actions/upload-artifact@v4
         with:
-          name: release-apk
-          path: base_project/build/app/outputs/flutter-apk/app-release.apk
+          name: family-tree-web
+          path: base_project/build/web/
