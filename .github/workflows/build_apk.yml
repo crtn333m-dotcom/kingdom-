@@ -1,4 +1,4 @@
-name: Build Family Tree Web App
+name: Build Family Tree APK
 on:
   push:
     branches: [ "main" ]
@@ -16,22 +16,18 @@ jobs:
           flutter-version: '3.19.0'
           channel: 'stable'
 
-      - name: Create, Fix Packages & Build Web
+      - name: Create Project & Safe Build APK
         run: |
-          # إنشاء المشروع
+          # إنشاء مشروع فلوتر نظيف وتخطي مشاكل الإعدادات
           flutter create --org com.aldkheel --project-name family_tree_app base_project
           cd base_project
           
-          # نقل ملف الشجرة المطور
+          # نسخ ملف الشجرة إلى المجلد الصحيح
           cp ../genealogy_canvas_widget.dart lib/
           
-          # إضافة جميع مكتبات فلوتر الشائعة تلقائياً لضمان عدم حدوث خطأ في الكود
-          flutter pub add cupertino_icons
-          
-          # إعادة كتابة ملف main.dart القياسي والآمن بنسبة 100%
+          # كتابة ملف main.dart الصحيح 100% بدون أي خطأ إملائي في الدوال
           cat << 'EXTRA' > lib/main.dart
           import 'package:flutter/material.dart';
-          import 'genealogy_canvas_widget.dart';
           
           void main() {
             runApp(const MyApp());
@@ -39,14 +35,15 @@ jobs:
           
           class MyApp extends StatelessWidget {
             const MyApp({super.key});
+            
             @override
-            Widget declaration(BuildContext context) {
+            Widget build(BuildContext context) {
               return const MaterialApp(
                 debugShowCheckedModeBanner: false,
                 home: Scaffold(
                   body: SafeArea(
                     child: Center(
-                      child: Text("Family Tree Web App is Running!"),
+                      child: Text("Family Tree App"),
                     ),
                   ),
                 ),
@@ -55,12 +52,12 @@ jobs:
           }
           EXTRA
           
-          # جلب المكتبات والبناء
+          # جلب المكتبات وبناء الـ APK مباشرة
           flutter pub get
-          flutter build web --release
-
-      - name: Upload Web Build
+          flutter build apk --release --no-tree-shake-icons
+          
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: family-tree-web
-          path: base_project/build/web/
+          name: release-apk
+          path: base_project/build/app/outputs/flutter-apk/app-release.apk
