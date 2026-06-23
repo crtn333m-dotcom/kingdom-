@@ -1,0 +1,36 @@
+name: Build Family Tree APK
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Set up Java & Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0'
+          channel: 'stable'
+      - name: Auto Create Project & Build
+        run: |
+          flutter create --org com.aldkheel --project-name family_tree_app base_project
+          cp genealogy_canvas_widget.dart base_project/lib/
+          cat << 'EXTRA' > base_project/lib/main.dart
+          import 'package:flutter/material.dart';
+          import 'genealogy_canvas_widget.dart';
+          void main() => runApp(MaterialApp(
+            debugShowCheckedModeBanner: false,
+            home: Scaffold(body: SafeArea(child: GenealogyCanvas(elementsJson: '{}', onElementsChanged: (json) async => null))),
+          ));
+          EXTRA
+          cd base_project
+          flutter pub get
+          flutter build apk --release
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-apk
+          path: base_project/build/app/outputs/flutter-apk/app-release.apk
