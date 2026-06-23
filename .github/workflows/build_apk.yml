@@ -16,18 +16,18 @@ jobs:
           flutter-version: '3.19.0'
           channel: 'stable'
 
-      - name: Create Project & Safe Build APK
+      - name: Create Project & Build Real Family Tree
         run: |
-          # إنشاء مشروع فلوتر نظيف وتخطي مشاكل الإعدادات
           flutter create --org com.aldkheel --project-name family_tree_app base_project
           cd base_project
           
-          # نسخ ملف الشجرة إلى المجلد الصحيح
+          # نسخ ملف الشجرة الخاص بك
           cp ../genealogy_canvas_widget.dart lib/
           
-          # كتابة ملف main.dart الصحيح 100% بدون أي خطأ إملائي في الدوال
+          # كتابة ملف main.dart ليتصل مباشرة بالـ Widget الخاصة بك
           cat << 'EXTRA' > lib/main.dart
           import 'package:flutter/material.dart';
+          import 'genealogy_canvas_widget.dart';
           
           void main() {
             runApp(const MyApp());
@@ -38,12 +38,14 @@ jobs:
             
             @override
             Widget build(BuildContext context) {
-              return const MaterialApp(
+              return MaterialApp(
                 debugShowCheckedModeBanner: false,
                 home: Scaffold(
                   body: SafeArea(
-                    child: Center(
-                      child: Text("Family Tree App"),
+                    // هنا قمنا باستدعاء الـ Widget الفعلية الخاصة بك لتشغيل الشجرة
+                    child: GenealogyCanvas(
+                      elementsJson: '{}', 
+                      onElementsChanged: (json) async => null,
                     ),
                   ),
                 ),
@@ -52,7 +54,6 @@ jobs:
           }
           EXTRA
           
-          # جلب المكتبات وبناء الـ APK مباشرة
           flutter pub get
           flutter build apk --release --no-tree-shake-icons
           
